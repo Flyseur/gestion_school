@@ -1,0 +1,84 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Enregistrer une Absence{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Enregistrer une Absence</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Champ étudiant avec Select2 -->
+                        <div class="mb-3">
+                            <label for="id_etudiant" class="form-label">Étudiant</label>
+                            <select name="etudiant" id="id_etudiant" class="form-control select2" required>
+                                <option value="">---------</option>
+                                {% for student in form.fields.etudiant.queryset %}
+                                <option value="{{ student.id }}" {% if form.etudiant.value == student.id %}selected{% endif %}>
+                                    {{ student.matricule }} - {{ student.user.last_name }} {{ student.user.first_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Date et heures -->
+                        {{ form.date_absence|as_crispy_field }}
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.heure_debut|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.heure_fin|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <!-- Justification -->
+                        {{ form.justifie|as_crispy_field }}
+                        {{ form.motif|as_crispy_field }}
+                        
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading">Instructions :</h5>
+                            <ol class="mb-0">
+                                <li>Sélectionnez l'étudiant concerné</li>
+                                <li>Choisissez la date de l'absence</li>
+                                <li>Indiquez les heures de début et de fin</li>
+                                <li>Précisez si l'absence est justifiée</li>
+                                <li>Ajoutez un motif si nécessaire</li>
+                            </ol>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'core:absence_list' %}" class="btn btn-secondary me-md-2">Annuler</a>
+                            <button type="submit" class="btn btn-primary">Enregistrer l'absence</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            theme: 'bootstrap-5',
+            width: '100%'
+        });
+    });
+</script>
+{% endblock %}

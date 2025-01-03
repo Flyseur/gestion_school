@@ -1,0 +1,87 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Documents de {{ student.user.get_full_name }}</h2>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if user.is_staff %}
+    <div class="mb-4">
+        <h3>Actions administrateur</h3>
+        <div class="btn-group">
+            <a href="{% url 'core:generate_bulletin' student.id %}" class="btn btn-primary">
+                Générer un bulletin
+            </a>
+            <a href="{% url 'core:generate_certificat' student.id %}" class="btn btn-success">
+                Générer un certificat de scolarité
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Bulletins</h4>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for doc in documents %}
+                        {% if doc.type_document == 'BULLETIN' %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">{{ doc.titre }}</h5>
+                                    <small class="text-muted">Généré le {{ doc.date_creation|date:"d/m/Y" }}</small>
+                                </div>
+                                <a href="{% url 'core:download_document' doc.id %}" class="btn btn-sm btn-primary">
+                                    Télécharger
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Certificats de scolarité</h4>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for doc in documents %}
+                        {% if doc.type_document == 'CERTIFICAT' %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">{{ doc.titre }}</h5>
+                                    <small class="text-muted">Généré le {{ doc.date_creation|date:"d/m/Y" }}</small>
+                                </div>
+                                <a href="{% url 'core:download_document' doc.id %}" class="btn btn-sm btn-primary">
+                                    Télécharger
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% if edit %}Modifier{% else %}Ajouter{% endif %} une classe{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">{% if edit %}Modifier{% else %}Ajouter{% endif %} une classe</h2>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.nom.id_for_label }}" class="form-label">{{ form.nom.label }}</label>
+                            {{ form.nom.errors }}
+                            <input type="text" name="{{ form.nom.html_name }}" 
+                                   class="form-control {% if form.nom.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.nom.id_for_label }}" 
+                                   value="{{ form.nom.value|default:'' }}"
+                                   required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.niveau.id_for_label }}" class="form-label">{{ form.niveau.label }}</label>
+                            {{ form.niveau.errors }}
+                            <input type="text" name="{{ form.niveau.html_name }}" 
+                                   class="form-control {% if form.niveau.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.niveau.id_for_label }}" 
+                                   value="{{ form.niveau.value|default:'' }}"
+                                   required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.annee_scolaire.id_for_label }}" class="form-label">{{ form.annee_scolaire.label }}</label>
+                            {{ form.annee_scolaire.errors }}
+                            <input type="text" name="{{ form.annee_scolaire.html_name }}" 
+                                   class="form-control {% if form.annee_scolaire.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.annee_scolaire.id_for_label }}" 
+                                   value="{{ form.annee_scolaire.value|default:'' }}"
+                                   placeholder="2023-2024" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.professeur_principal.id_for_label }}" class="form-label">{{ form.professeur_principal.label }}</label>
+                            {{ form.professeur_principal.errors }}
+                            {{ form.professeur_principal }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.active.id_for_label }}" class="form-label">{{ form.active.label }}</label>
+                            {{ form.active.errors }}
+                            <div class="form-check">
+                                {{ form.active }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                {% if edit %}Modifier{% else %}Ajouter{% endif %} la classe
+                            </button>
+                            <a href="{% url 'core:class_list' %}" class="btn btn-secondary">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

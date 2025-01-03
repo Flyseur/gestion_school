@@ -1,0 +1,139 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Liste des absences{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-user-clock me-2"></i>Liste des absences
+            </h5>
+            {% if user.is_staff or user.professor %}
+            <a href="{% url 'core:add_absence' %}" class="btn btn-light">
+                <i class="fas fa-plus me-2"></i>Ajouter une absence
+            </a>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if absences %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Étudiant</th>
+                                <th>Cours</th>
+                                <th>Heures</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for absence in absences %}
+                                <tr>
+                                    <td>{{ absence.date_absence|date:"d/m/Y" }}</td>
+                                    <td>{{ absence.etudiant.user.get_full_name }}</td>
+                                    <td>{{ absence.cours.matiere.nom }}</td>
+                                    <td>{{ absence.heure_debut }} - {{ absence.heure_fin }}</td>
+                                    <td>
+                                        {% if absence.justifie %}
+                                            <span class="badge bg-success">Justifiée</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Non justifiée</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.is_staff or user.professor %}
+                                            <a href="{% url 'core:edit_absence' absence.id %}" 
+                                               class="btn btn-sm btn-outline-primary me-2">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteModal{{ absence.id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+
+                                            <!-- Modal de confirmation de suppression -->
+                                            <div class="modal fade" id="deleteModal{{ absence.id }}" tabindex="-1">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Confirmer la suppression</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            Êtes-vous sûr de vouloir supprimer cette absence ?
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                            <form action="{% url 'core:delete_absence' absence.id %}" method="post" class="d-inline">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-danger">Supprimer</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    Aucune absence enregistrée.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 1rem;
+    }
+    
+    .card-header {
+        border-radius: 1rem 1rem 0 0;
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    }
+    
+    .table th {
+        border-top: none;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 0.5em 1em;
+    }
+    
+    .btn-outline-primary, .btn-outline-danger {
+        border-radius: 0.5rem;
+    }
+    
+    .btn-outline-primary:hover, .btn-outline-danger:hover {
+        color: white;
+    }
+    
+    .modal-content {
+        border-radius: 1rem;
+        border: none;
+    }
+    
+    .modal-header {
+        border-radius: 1rem 1rem 0 0;
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+    }
+    
+    .btn-close {
+        filter: brightness(0) invert(1);
+    }
+</style>
+{% endblock %}

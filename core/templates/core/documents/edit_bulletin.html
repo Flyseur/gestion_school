@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Modifier le Bulletin - {{ document.etudiant.user.get_full_name }}</h2>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="card">
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Étudiant</label>
+                    <input type="text" class="form-control" value="{{ document.etudiant.user.get_full_name }}" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Période</label>
+                    <select name="periode" class="form-select">
+                        <option value="Premier Semestre" {% if periode == "Premier Semestre" %}selected{% endif %}>Premier Semestre</option>
+                        <option value="Deuxième Semestre" {% if periode == "Deuxième Semestre" %}selected{% endif %}>Deuxième Semestre</option>
+                        <option value="Annuel" {% if periode == "Annuel" %}selected{% endif %}>Annuel</option>
+                    </select>
+                </div>
+
+                <h4 class="mt-4">Notes par Matière</h4>
+                {% for matiere in matieres %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5>{{ matiere.nom }}</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Note</label>
+                                <input type="number" name="note_{{ matiere.id }}" class="form-control" 
+                                       value="{{ matiere.note|default:'' }}" min="0" max="20" step="0.01">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Coefficient</label>
+                                <input type="number" class="form-control" value="{{ matiere.coefficient }}" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Appréciation</label>
+                                <select name="appreciation_{{ matiere.id }}" class="form-select">
+                                    <option value="Excellent" {% if matiere.appreciation == "Excellent" %}selected{% endif %}>Excellent</option>
+                                    <option value="Très Bien" {% if matiere.appreciation == "Très Bien" %}selected{% endif %}>Très Bien</option>
+                                    <option value="Bien" {% if matiere.appreciation == "Bien" %}selected{% endif %}>Bien</option>
+                                    <option value="Assez Bien" {% if matiere.appreciation == "Assez Bien" %}selected{% endif %}>Assez Bien</option>
+                                    <option value="Insuffisant" {% if matiere.appreciation == "Insuffisant" %}selected{% endif %}>Insuffisant</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="mb-3">
+                    <label class="form-label">Appréciation Générale</label>
+                    <textarea name="appreciation_generale" class="form-control" rows="3">{{ appreciation_generale }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+            <a href="{% url 'core:student_detail' document.etudiant.id %}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

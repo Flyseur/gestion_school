@@ -1,0 +1,74 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Menu de navigation des messages -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'core:compose_message' %}" class="btn btn-primary">
+                            <i class="fas fa-pen"></i> Nouveau Message
+                        </a>
+                    </div>
+                    <hr>
+                    <div class="list-group">
+                        <a href="{% url 'core:inbox' %}" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-inbox"></i> Boîte de réception
+                        </a>
+                        <a href="{% url 'core:sent_messages' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-paper-plane"></i> Messages envoyés
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des messages -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Boîte de réception</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>État</th>
+                                    <th>De</th>
+                                    <th>Sujet</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for message in messages %}
+                                <tr class="{% if not message.is_read %}fw-bold{% endif %}">
+                                    <td>
+                                        {% if message.is_read %}
+                                            <i class="fas fa-envelope-open text-muted"></i>
+                                        {% else %}
+                                            <i class="fas fa-envelope text-primary"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ message.sender.get_full_name|default:message.sender.username }}</td>
+                                    <td>
+                                        <a href="{% url 'core:view_message' message.id %}" class="text-decoration-none">
+                                            {{ message.subject }}
+                                        </a>
+                                    </td>
+                                    <td>{{ message.date_sent|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">Aucun message dans votre boîte de réception</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

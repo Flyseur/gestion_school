@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestion Scolaire{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+    <style>
+        :root {
+            --sidebar-bg: #ffffff;
+            --sidebar-hover: #f8f9fa;
+            --sidebar-active: #e9ecef;
+            --sidebar-text: #212529;
+            --primary-color: #0d6efd;
+            --header-bg: #f8f9fa;
+        }
+
+        /* Styles pour le menu latéral */
+        #sidebar {
+            min-width: 250px;
+            max-width: 250px;
+            min-height: 100vh;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            transition: all 0.3s;
+            position: fixed;
+            z-index: 1000;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #sidebar.active {
+            margin-left: -250px;
+        }
+
+        #sidebar .sidebar-header {
+            padding: 20px;
+            background: var(--header-bg);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        #sidebar .sidebar-header h3 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        #sidebar ul.components {
+            padding: 20px 0;
+        }
+
+        #sidebar ul li a {
+            padding: 12px 20px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-radius: 8px;
+            margin: 4px 12px;
+        }
+
+        #sidebar ul li a:hover {
+            background: var(--sidebar-hover);
+            transform: translateX(5px);
+        }
+
+        #sidebar ul li a.active {
+            background: var(--sidebar-active);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        /* Styles pour le contenu principal */
+        #content {
+            width: 100%;
+            min-height: 100vh;
+            transition: all 0.3s;
+            margin-left: 250px;
+            background: #f8f9fa;
+        }
+
+        #content.active {
+            margin-left: 0;
+        }
+
+        /* Styles pour le bouton de basculement */
+        #sidebarCollapse {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            display: none;
+            background-color: var(--sidebar-bg);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: var(--sidebar-text);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Style pour les icônes */
+        .nav-link i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            text-align: center;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover i,
+        .nav-link.active i {
+            color: var(--primary-color);
+        }
+
+        /* Style pour le menu déroulant utilisateur */
+        .user-dropdown {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 20px;
+            background: var(--header-bg);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .user-dropdown .dropdown-toggle {
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .user-dropdown .dropdown-toggle:hover {
+            background: var(--sidebar-hover);
+        }
+
+        .user-dropdown img,
+        .user-dropdown i {
+            width: 32px;
+            height: 32px;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+
+        .user-dropdown .dropdown-menu {
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-dropdown .dropdown-item {
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            color: var(--sidebar-text);
+        }
+
+        .user-dropdown .dropdown-item i {
+            width: 20px;
+            margin-right: 8px;
+            color: #6c757d;
+        }
+
+        .user-dropdown .dropdown-item:hover {
+            background: var(--sidebar-hover);
+        }
+
+        /* Styles pour les appareils mobiles */
+        @media (max-width: 768px) {
+            #sidebar {
+                margin-left: -250px;
+            }
+            #sidebar.active {
+                margin-left: 0;
+            }
+            #content {
+                margin-left: 0;
+            }
+            #content.active {
+                margin-left: 250px;
+            }
+            #sidebarCollapse {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper d-flex">
+        <!-- Bouton de basculement du menu -->
+        <button type="button" id="sidebarCollapse" class="btn">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Menu latéral -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h3>Gestion Scolaire</h3>
+            </div>
+
+            <ul class="list-unstyled components">
+                <li>
+                    <a href="{% url 'core:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'core:student_list' %}" class="nav-link {% if request.resolver_match.url_name == 'student_list' %}active{% endif %}">
+                        <i class="fas fa-user-graduate"></i> Étudiants
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'core:professor_list' %}" class="nav-link {% if request.resolver_match.url_name == 'professor_list' %}active{% endif %}">
+                        <i class="fas fa-chalkboard-teacher"></i> Professeurs
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'core:class_list' %}" class="nav-link {% if request.resolver_match.url_name == 'class_list' %}active{% endif %}">
+                        <i class="fas fa-school"></i> Classes
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'core:cours_list' %}" class="nav-link {% if request.resolver_match.url_name == 'cours_list' %}active{% endif %}">
+                        <i class="fas fa-book"></i> Cours
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'core:payment_list' %}" class="nav-link {% if request.resolver_match.url_name == 'payment_list' %}active{% endif %}">
+                        <i class="fas fa-money-bill"></i> Paiements
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'core:absence_list' %}" class="nav-link {% if request.resolver_match.url_name == 'absence_list' %}active{% endif %}">
+                        <i class="fas fa-calendar-times"></i> Absences
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'core:message_list' %}" class="nav-link {% if request.resolver_match.url_name == 'message_list' %}active{% endif %}">
+                        <i class="fas fa-envelope"></i> Messages
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Menu déroulant utilisateur -->
+            <div class="user-dropdown">
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if user.photo %}
+                            <img src="{{ user.photo.url }}" alt="Photo de profil" class="rounded-circle">
+                        {% else %}
+                            <i class="fas fa-user-circle"></i>
+                        {% endif %}
+                        <strong class="text-dark">{{ user.get_full_name|default:user.username }}</strong>
+                    </a>
+                    <ul class="dropdown-menu shadow" aria-labelledby="dropdownUser1">
+                        <li><a class="dropdown-item" href="{% url 'core:profile' %}"><i class="fas fa-user-cog"></i> Profil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'core:logout' %}"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Contenu principal -->
+        <div id="content">
+            <div class="container-fluid p-4">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+    <script>
+        $(document).ready(function () {
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar, #content').toggleClass('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Enregistrer un Paiement{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Enregistrer un Paiement</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Champ étudiant avec Select2 -->
+                        <div class="mb-3">
+                            <label for="id_etudiant" class="form-label">Étudiant</label>
+                            <select name="etudiant" id="id_etudiant" class="form-control select2" required>
+                                <option value="">---------</option>
+                                {% for student in form.fields.etudiant.queryset %}
+                                <option value="{{ student.id }}">
+                                    {{ student.matricule }} - {{ student.user.last_name }} {{ student.user.first_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Autres champs -->
+                        {{ form.type_paiement|as_crispy_field }}
+                        {{ form.montant|as_crispy_field }}
+                        {{ form.description|as_crispy_field }}
+                        
+                        <div class="alert alert-info">
+                            <h5>Instructions :</h5>
+                            <p>1. Recherchez et sélectionnez l'étudiant qui effectue le paiement</p>
+                            <p>2. Choisissez le type de paiement</p>
+                            <p>3. Entrez le montant reçu</p>
+                            <p>4. Ajoutez une description si nécessaire</p>
+                            <p>Note : Le paiement sera automatiquement enregistré comme validé.</p>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'core:payment_list' %}" class="btn btn-secondary me-md-2">Annuler</a>
+                            <button type="submit" class="btn btn-primary">Enregistrer le paiement</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('.select2').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'Rechercher un étudiant par nom ou matricule...',
+        allowClear: true,
+        minimumInputLength: 1
+    });
+});
+</script>
+{% endblock %}

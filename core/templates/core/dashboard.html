@@ -1,0 +1,361 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Tableau de bord</h1>
+        <div class="text-muted">
+            <i class="fas fa-calendar me-2"></i>
+            <span id="current-date">{{ current_date }}</span>
+        </div>
+    </div>
+
+    <!-- Cartes statistiques -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 bg-gradient-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2 opacity-75">Étudiants</h6>
+                            <h2 class="mb-0">{{ total_students }}</h2>
+                        </div>
+                        <div class="icon-circle bg-white bg-opacity-25">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                    </div>
+                    <a href="{% url 'core:student_list' %}" class="text-white text-decoration-none d-block mt-3">
+                        Voir détails <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 bg-gradient-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2 opacity-75">Paiements</h6>
+                            <h2 class="mb-0">{{ total_payments }} FCFA</h2>
+                        </div>
+                        <div class="icon-circle bg-white bg-opacity-25">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                    </div>
+                    <a href="{% url 'core:payment_list' %}" class="text-white text-decoration-none d-block mt-3">
+                        Voir détails <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 bg-gradient-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2 opacity-75">Classes</h6>
+                            <h2 class="mb-0">{{ total_classes }}</h2>
+                        </div>
+                        <div class="icon-circle bg-white bg-opacity-25">
+                            <i class="fas fa-school"></i>
+                        </div>
+                    </div>
+                    <a href="{% url 'core:class_list' %}" class="text-white text-decoration-none d-block mt-3">
+                        Voir détails <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 bg-gradient-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-2 opacity-75">Présences</h6>
+                            <h2 class="mb-0">{{ attendance_rate }}%</h2>
+                        </div>
+                        <div class="icon-circle bg-white bg-opacity-25">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                    </div>
+                    <a href="{% url 'core:absence_list' %}" class="text-white text-decoration-none d-block mt-3">
+                        Voir détails <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="row g-4 mb-4">
+        <!-- Graphique des paiements -->
+        <div class="col-xl-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">Évolution des paiements</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="paymentsChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphique de répartition des étudiants -->
+        <div class="col-xl-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">Répartition par classe</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="studentsDistributionChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Activités récentes -->
+        <div class="col-xl-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Activités Récentes</h5>
+                    <a href="#" class="btn btn-sm btn-primary">Voir tout</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="timeline p-4">
+                        {% for activity in recent_activities %}
+                        <div class="timeline-item">
+                            <div class="timeline-icon bg-primary">
+                                <i class="fas {{ activity.icon }} text-white"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">{{ activity.title }}</h6>
+                                <p class="text-muted mb-0">{{ activity.description }}</p>
+                                <small class="text-muted">{{ activity.timestamp }}</small>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Aucune activité récente</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages récents -->
+        <div class="col-xl-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Messages Récents</h5>
+                    <a href="#" class="btn btn-sm btn-primary">Voir tout</a>
+                </div>
+                <div class="card-body p-0">
+                    {% for message in recent_messages %}
+                    <div class="p-3 border-bottom">
+                        <div class="d-flex align-items-center mb-2">
+                            {% if message.sender.photo %}
+                            <img src="{{ message.sender.photo.url }}" alt="Profile" class="rounded-circle me-2" width="32" height="32">
+                            {% else %}
+                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                <i class="fas fa-user text-muted"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-0">{{ message.sender.get_full_name }}</h6>
+                                <small class="text-muted">{{ message.date_sent|date:"d/m/Y H:i" }}</small>
+                            </div>
+                        </div>
+                        <p class="mb-0">{{ message.content|truncatechars:100 }}</p>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-envelope fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Aucun message récent</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #4e73df 0%, #224abe 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(45deg, #1cc88a 0%, #13855c 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(45deg, #36b9cc 0%, #258391 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(45deg, #f6c23e 0%, #dda20a 100%);
+}
+
+.icon-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.timeline {
+    position: relative;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 3rem;
+    margin-bottom: 2rem;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-icon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timeline-icon i {
+    font-size: 1rem;
+}
+
+.timeline-content {
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.timeline-content:before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e3e6f0;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuration des graphiques
+    Chart.defaults.font.family = "'Poppins', sans-serif";
+    Chart.defaults.color = '#858796';
+
+    // Graphique des paiements
+    const paymentsCtx = document.getElementById('paymentsChart').getContext('2d');
+    new Chart(paymentsCtx, {
+        type: 'line',
+        data: {
+            labels: {{ payment_months|safe }},
+            datasets: [{
+                label: 'Paiements (FCFA)',
+                data: {{ payment_amounts|safe }},
+                borderColor: '#4e73df',
+                backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        borderDash: [2],
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Graphique de répartition des étudiants
+    const distributionCtx = document.getElementById('studentsDistributionChart').getContext('2d');
+    new Chart(distributionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ class_names|safe }},
+            datasets: [{
+                data: {{ students_per_class|safe }},
+                backgroundColor: [
+                    '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e',
+                    '#e74a3b', '#858796', '#5a5c69', '#2e59d9'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            cutout: '70%'
+        }
+    });
+
+    // Mise à jour de la date
+    function updateDate() {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').textContent = now.toLocaleDateString('fr-FR', options);
+    }
+    updateDate();
+});
+</script>
+{% endblock %}

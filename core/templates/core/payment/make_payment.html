@@ -1,0 +1,47 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Effectuer un Paiement{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Effectuer un Paiement</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="alert alert-info">
+                            <h5>Instructions de paiement :</h5>
+                            <p>1. Choisissez le type de paiement et le montant</p>
+                            <p>2. Sélectionnez votre méthode de paiement préférée</p>
+                            <p>3. Pour les paiements par Mobile Money :</p>
+                            <ul>
+                                <li>Numéro : +243 XXXXXXXXX</li>
+                                <li>Nom : École XYZ</li>
+                            </ul>
+                            <p>4. Pour les virements bancaires :</p>
+                            <ul>
+                                <li>IBAN : XX XX XXXX XXXX</li>
+                                <li>BIC : XXXXXXXX</li>
+                            </ul>
+                            <p>5. Ajoutez une preuve de paiement (capture d'écran ou photo du reçu)</p>
+                            <p>6. Votre paiement sera validé par l'administration après vérification</p>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'core:payment_list' %}" class="btn btn-secondary me-md-2">Annuler</a>
+                            <button type="submit" class="btn btn-primary">Soumettre le paiement</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

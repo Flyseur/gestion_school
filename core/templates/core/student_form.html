@@ -1,0 +1,121 @@
+{% extends 'core/base.html' %}
+
+{% block title %}
+    {% if edit %}Modifier l'étudiant{% else %}Ajouter un étudiant{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">
+                        {% if edit %}Modifier l'étudiant{% else %}Ajouter un étudiant{% endif %}
+                    </h2>
+                    
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.first_name.label }}</label>
+                                {{ form.first_name.errors }}
+                                <input type="text" name="{{ form.first_name.html_name }}" 
+                                       class="form-control {% if form.first_name.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.first_name.id_for_label }}"
+                                       value="{{ form.first_name.value|default:'' }}" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">{{ form.last_name.label }}</label>
+                                {{ form.last_name.errors }}
+                                <input type="text" name="{{ form.last_name.html_name }}" 
+                                       class="form-control {% if form.last_name.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.last_name.id_for_label }}"
+                                       value="{{ form.last_name.value|default:'' }}" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                            {{ form.email.errors }}
+                            <input type="email" name="{{ form.email.html_name }}" 
+                                   class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.email.id_for_label }}"
+                                   value="{{ form.email.value|default:'' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.matricule.id_for_label }}" class="form-label">{{ form.matricule.label }}</label>
+                            {{ form.matricule.errors }}
+                            <input type="text" name="{{ form.matricule.html_name }}" 
+                                   class="form-control {% if form.matricule.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.matricule.id_for_label }}"
+                                   value="{{ form.matricule.value|default:'' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.date_naissance.id_for_label }}" class="form-label">{{ form.date_naissance.label }}</label>
+                            {{ form.date_naissance.errors }}
+                            <input type="date" name="{{ form.date_naissance.html_name }}" 
+                                   class="form-control {% if form.date_naissance.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.date_naissance.id_for_label }}"
+                                   value="{{ form.date_naissance.value|date:'Y-m-d'|default:'' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.adresse.id_for_label }}" class="form-label">{{ form.adresse.label }}</label>
+                            {{ form.adresse.errors }}
+                            <textarea name="{{ form.adresse.html_name }}" 
+                                      class="form-control {% if form.adresse.errors %}is-invalid{% endif %}" 
+                                      id="{{ form.adresse.id_for_label }}"
+                                      rows="3">{{ form.adresse.value|default:'' }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.telephone.id_for_label }}" class="form-label">{{ form.telephone.label }}</label>
+                            {{ form.telephone.errors }}
+                            <input type="tel" name="{{ form.telephone.html_name }}" 
+                                   class="form-control {% if form.telephone.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.telephone.id_for_label }}"
+                                   value="{{ form.telephone.value|default:'' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.classe.id_for_label }}" class="form-label">{{ form.classe.label }}</label>
+                            {{ form.classe.errors }}
+                            {{ form.classe }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
+                            {{ form.password.errors }}
+                            <input type="password" name="{{ form.password.html_name }}" 
+                                   class="form-control {% if form.password.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.password.id_for_label }}"
+                                   value="{{ form.password.value|default:'' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.photo.id_for_label }}" class="form-label">{{ form.photo.label }}</label>
+                            {{ form.photo.errors }}
+                            <input type="file" name="{{ form.photo.html_name }}" 
+                                   class="form-control {% if form.photo.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.photo.id_for_label }}"
+                                   accept="image/*">
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                {% if edit %}Enregistrer les modifications{% else %}Ajouter l'étudiant{% endif %}
+                            </button>
+                            <a href="{% url 'core:student_list' %}" class="btn btn-secondary">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

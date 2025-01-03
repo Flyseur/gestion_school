@@ -1,0 +1,125 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Liste des Paiements{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Liste des Paiements</h1>
+                {% if user.is_staff %}
+                <a href="{% url 'core:add_payment' %}" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-1"></i>Nouveau paiement
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <input type="text" id="search-input" class="form-control" placeholder="Rechercher un paiement...">
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary filter-btn active" data-type="all">Tous</button>
+                        <button type="button" class="btn btn-outline-secondary filter-btn" data-type="INSCRIPTION">Inscription</button>
+                        <button type="button" class="btn btn-outline-secondary filter-btn" data-type="MENSUALITE">Mensualité</button>
+                        <button type="button" class="btn btn-outline-secondary filter-btn" data-type="AUTRE">Autre</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Référence</th>
+                            <th>Étudiant</th>
+                            <th>Type</th>
+                            <th>Montant</th>
+                            <th>Date</th>
+                            <th>Reçu par</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr class="payment-row" data-type="{{ payment.type_paiement }}">
+                            <td>{{ payment.reference }}</td>
+                            <td>{{ payment.etudiant }}</td>
+                            <td>{{ payment.get_type_paiement_display }}</td>
+                            <td>{{ payment.montant }} FCFA</td>
+                            <td>{{ payment.date_paiement }}</td>
+                            <td>{{ payment.recu_par.get_full_name }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'core:payment_detail' pk=payment.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if user.is_staff %}
+                                    <a href="{% url 'core:edit_payment' pk=payment.id %}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'core:delete_payment' pk=payment.id %}" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">Aucun paiement trouvé</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-light">
+                            <td colspan="3" class="text-end fw-bold">Total:</td>
+                            <td colspan="4" class="fw-bold">{{ total_amount }} FCFA</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Fonction de recherche
+    document.getElementById('search-input').addEventListener('keyup', function() {
+        var searchText = this.value.toLowerCase();
+        filterPayments(searchText, getCurrentFilter());
+    });
+
+    // Gestion des filtres
+    document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            // Mise à jour de l'état actif des boutons
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+
+            // Application du filtre
+            filterPayments(document.getElementById('search-input').value.toLowerCase(), this.dataset.type);
+        });
+    });
+
+    function getCurrentFilter() {
+        return document.querySelector('.filter-btn.active').dataset.type;
+    }
+
+    function filterPayments(searchText, filterType) {
+        document.querySelectorAll('.payment-row').forEach(row => {
+            var text = row.textContent.toLowerCase();
+            var type = row.dataset.type;
+            var matchesSearch = text.includes(searchText);
+            var matchesFilter = filterType === 'all' || type === filterType;
+            row.style.display = matchesSearch && matchesFilter ? '' : 'none';
+        });
+    }
+</script>
+{% endblock %}

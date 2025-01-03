@@ -1,0 +1,154 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Détails du Professeur{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Détails du Professeur</h2>
+            <div class="btn-group">
+                <a href="{% url 'core:edit_professor' professor.id %}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Modifier
+                </a>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="fas fa-trash"></i> Supprimer
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    {% if professor.photo %}
+                        <img src="{{ professor.photo.url }}" alt="Photo de {{ professor.user.get_full_name }}" 
+                             class="img-fluid rounded-circle mb-3" style="max-width: 200px;">
+                    {% else %}
+                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mb-3" 
+                             style="width: 200px; height: 200px; margin: auto;">
+                            <i class="fas fa-user fa-5x"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-8">
+                    <h3>{{ professor.user.get_full_name }}</h3>
+                    <table class="table">
+                        <tr>
+                            <th style="width: 150px;">Matricule :</th>
+                            <td>{{ professor.matricule }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email :</th>
+                            <td>{{ professor.user.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Spécialité :</th>
+                            <td>{{ professor.specialite }}</td>
+                        </tr>
+                        <tr>
+                            <th>Téléphone :</th>
+                            <td>{{ professor.telephone|default:"Non renseigné" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Classes dirigées -->
+            <div class="mt-4">
+                <h4>Classes dirigées</h4>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Classe</th>
+                                <th>Niveau</th>
+                                <th>Année scolaire</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for classe in professor.classes_dirigees.all %}
+                                <tr>
+                                    <td>{{ classe.nom }}</td>
+                                    <td>{{ classe.niveau }}</td>
+                                    <td>{{ classe.annee_scolaire }}</td>
+                                    <td>
+                                        <a href="{% url 'core:class_detail' classe.id %}" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">Aucune classe dirigée</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Cours enseignés -->
+            <div class="mt-4">
+                <h4>Cours enseignés</h4>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Matière</th>
+                                <th>Classe</th>
+                                <th>Jour</th>
+                                <th>Horaire</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cours in professor.cours_set.all %}
+                                <tr>
+                                    <td>{{ cours.matiere.nom }}</td>
+                                    <td>{{ cours.classe.nom }}</td>
+                                    <td>{{ cours.get_jour_display }}</td>
+                                    <td>{{ cours.heure_debut|time:"H:i" }} - {{ cours.heure_fin|time:"H:i" }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">Aucun cours assigné</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'core:professor_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+            <a href="{% url 'core:compose_message' %}?recipient={{ professor.user.id }}" class="btn btn-primary">
+                <i class="fas fa-envelope"></i> Envoyer un message
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmer la suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Êtes-vous sûr de vouloir supprimer le professeur {{ professor.user.get_full_name }} ?
+                Cette action est irréversible.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form action="{% url 'core:delete_professor' professor.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

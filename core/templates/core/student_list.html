@@ -1,0 +1,235 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
+{% endblock %}
+
+{% block title %}Liste des Étudiants{% endblock %}
+
+{% block content %}
+<div class="container-fluid fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Liste des Étudiants</h1>
+        <div class="d-flex gap-2">
+            <a href="{% url 'core:add_student' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Ajouter un étudiant
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtres et recherche -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="search" name="search" value="{{ request.GET.search }}" placeholder="Rechercher...">
+                        <label for="search">Rechercher un étudiant</label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-floating">
+                        <select class="form-select" id="classe" name="classe">
+                            <option value="">Toutes les classes</option>
+                            {% for classe in classes %}
+                            <option value="{{ classe.id }}" {% if request.GET.classe == classe.id|stringformat:"s" %}selected{% endif %}>
+                                {{ classe.nom }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <label for="classe">Filtrer par classe</label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-floating">
+                        <select class="form-select" id="status" name="status">
+                            <option value="">Tous les statuts</option>
+                            <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Actif</option>
+                            <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactif</option>
+                        </select>
+                        <label for="status">Statut</label>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-center">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Liste des étudiants -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th scope="col" class="ps-4">Étudiant</th>
+                            <th scope="col">Matricule</th>
+                            <th scope="col">Classe</th>
+                            <th scope="col">Contact</th>
+                            <th scope="col">Statut</th>
+                            <th scope="col" class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    {% if student.photo %}
+                                    <img src="{{ student.photo.url }}" alt="Photo" class="rounded-circle me-3" width="40" height="40">
+                                    {% else %}
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-user text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="mb-0">{{ student.user.get_full_name }}</h6>
+                                        <small class="text-muted">{{ student.user.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ student.matricule }}</td>
+                            <td>
+                                <span class="badge bg-info text-white">{{ student.classe.nom }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <small><i class="fas fa-phone me-2"></i>{{ student.telephone }}</small>
+                                    <small><i class="fas fa-envelope me-2"></i>{{ student.user.email }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                {% if student.is_active %}
+                                <span class="badge bg-success">Actif</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactif</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group">
+                                    <a href="{% url 'core:student_detail' student.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'core:edit_student' student.id %}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('{% url 'core:delete_student' student.id %}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                                    <p>Aucun étudiant trouvé</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if students.paginator.num_pages > 1 %}
+    <nav class="mt-4" aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if students.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ students.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.classe %}&classe={{ request.GET.classe }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in students.paginator.page_range %}
+                {% if num == students.number %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > students.number|add:'-3' and num < students.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.classe %}&classe={{ request.GET.classe }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                        {{ num }}
+                    </a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if students.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ students.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.classe %}&classe={{ request.GET.classe }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<style>
+    .form-floating > .form-control,
+    .form-floating > .form-select {
+        height: calc(3.5rem + 2px);
+        line-height: 1.25;
+    }
+
+    .form-floating > label {
+        padding: 1rem 0.75rem;
+    }
+
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+
+    .btn-group .btn i {
+        font-size: 0.875rem;
+    }
+
+    .pagination .page-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        border: none;
+        margin: 0 0.25rem;
+        border-radius: 0.25rem;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .badge {
+        padding: 0.5em 0.75em;
+        font-weight: 500;
+    }
+</style>
+
+<script>
+    function confirmDelete(url) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cet étudiant ?')) {
+            window.location.href = url;
+        }
+    }
+</script>
+{% endblock %}

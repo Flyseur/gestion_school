@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Certificat de Scolarité</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .content {
+            margin: 40px 0;
+            text-align: justify;
+        }
+        .signature {
+            margin-top: 100px;
+            text-align: right;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>CERTIFICAT DE SCOLARITÉ</h1>
+        <h3>Année Scolaire {{ annee_scolaire }}</h3>
+    </div>
+
+    <div class="content">
+        <p>Je soussigné(e), Directeur(trice) de l'École de Formation, certifie que :</p>
+        
+        <p style="margin-left: 40px;">
+            <strong>L'élève {{ student.user.get_full_name }}</strong><br>
+            Né(e) le : {{ student.date_naissance|date:"d/m/Y" }}<br>
+            Matricule : {{ student.matricule }}
+        </p>
+
+        <p>est régulièrement inscrit(e) dans notre établissement en classe de <strong>{{ student.classe.nom }}</strong> 
+        pour l'année scolaire {{ student.classe.annee_scolaire }}.</p>
+
+        <p>Ce certificat est délivré à l'intéressé(e) pour servir et valoir ce que de droit.</p>
+    </div>
+
+    <div class="signature">
+        <p>Fait à [Ville], le {{ date_generation|date:"d/m/Y" }}</p>
+        <br><br>
+        <p>Le Directeur de l'École</p>
+        <br>
+        <p>_________________</p>
+    </div>
+
+    <div class="footer">
+        <p>École de Formation - Adresse - Téléphone: +243 XXX XXX XXX</p>
+    </div>
+</body>
+</html>

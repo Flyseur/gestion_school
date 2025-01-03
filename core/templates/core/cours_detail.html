@@ -1,0 +1,111 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Détails du cours{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="card-title mb-0">Détails du cours</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Informations générales</h5>
+                            <table class="table">
+                                <tr>
+                                    <th>Matière:</th>
+                                    <td>{{ cours.matiere.nom }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Professeur:</th>
+                                    <td>{{ cours.professeur.user.get_full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Classe:</th>
+                                    <td>{{ cours.classe.nom }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Jour:</th>
+                                    <td>{{ cours.get_jour_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Horaire:</th>
+                                    <td>{{ cours.heure_debut|time:"H:i" }} - {{ cours.heure_fin|time:"H:i" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Notes du cours</h5>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Étudiant</th>
+                                            <th>Note</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for note in notes %}
+                                        <tr>
+                                            <td>{{ note.etudiant.user.get_full_name }}</td>
+                                            <td>{{ note.valeur }}/20</td>
+                                            <td>{{ note.date|date:"d/m/Y" }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="3" class="text-center">Aucune note enregistrée</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h5>Absences</h5>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Étudiant</th>
+                                            <th>Date</th>
+                                            <th>Justifiée</th>
+                                            <th>Motif</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for absence in absences %}
+                                        <tr>
+                                            <td>{{ absence.etudiant.user.get_full_name }}</td>
+                                            <td>{{ absence.date_absence|date:"d/m/Y" }}</td>
+                                            <td>
+                                                {% if absence.justifie %}
+                                                <span class="badge bg-success">Oui</span>
+                                                {% else %}
+                                                <span class="badge bg-danger">Non</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ absence.motif|default:"-" }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center">Aucune absence enregistrée</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

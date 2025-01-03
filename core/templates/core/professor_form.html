@@ -1,0 +1,121 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% if edit %}Modifier{% else %}Ajouter{% endif %} un Professeur{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">
+                        {% if edit %}
+                            Modifier le professeur {{ professor.user.get_full_name }}
+                        {% else %}
+                            Ajouter un Professeur
+                        {% endif %}
+                    </h2>
+
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">Prénom</label>
+                                {{ form.first_name.errors }}
+                                <input type="text" name="{{ form.first_name.html_name }}" 
+                                       class="form-control {% if form.first_name.errors %}is-invalid{% endif %}"
+                                       id="{{ form.first_name.id_for_label }}" 
+                                       value="{{ form.first_name.value|default:'' }}"
+                                       required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">Nom</label>
+                                {{ form.last_name.errors }}
+                                <input type="text" name="{{ form.last_name.html_name }}" 
+                                       class="form-control {% if form.last_name.errors %}is-invalid{% endif %}"
+                                       id="{{ form.last_name.id_for_label }}" 
+                                       value="{{ form.last_name.value|default:'' }}"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                            {{ form.email.errors }}
+                            <input type="email" name="{{ form.email.html_name }}" 
+                                   class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                                   id="{{ form.email.id_for_label }}" 
+                                   value="{{ form.email.value|default:'' }}"
+                                   required>
+                        </div>
+
+                        {% if edit %}
+                            <div class="mb-3">
+                                <label for="{{ form.matricule.id_for_label }}" class="form-label">Matricule</label>
+                                {{ form.matricule.errors }}
+                                <input type="text" name="{{ form.matricule.html_name }}" 
+                                       class="form-control"
+                                       id="{{ form.matricule.id_for_label }}" 
+                                       value="{{ form.matricule.value|default:'' }}"
+                                       readonly>
+                                <small class="text-muted">Le matricule ne peut pas être modifié</small>
+                            </div>
+                        {% else %}
+                            {{ form.matricule }}
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.specialite.id_for_label }}" class="form-label">Spécialité</label>
+                            {{ form.specialite.errors }}
+                            <input type="text" name="{{ form.specialite.html_name }}" 
+                                   class="form-control {% if form.specialite.errors %}is-invalid{% endif %}"
+                                   id="{{ form.specialite.id_for_label }}" 
+                                   value="{{ form.specialite.value|default:'' }}"
+                                   required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.photo.id_for_label }}" class="form-label">Photo</label>
+                            {{ form.photo.errors }}
+                            {% if professor.photo %}
+                                <div class="mb-2">
+                                    <img src="{{ professor.photo.url }}" alt="Photo actuelle" class="img-thumbnail" style="max-height: 100px;">
+                                    <p class="text-muted">Photo actuelle</p>
+                                </div>
+                            {% endif %}
+                            <input type="file" name="{{ form.photo.html_name }}" 
+                                   class="form-control {% if form.photo.errors %}is-invalid{% endif %}"
+                                   id="{{ form.photo.id_for_label }}" 
+                                   accept="image/*">
+                            {% if edit %}
+                                <small class="text-muted">Laissez vide pour conserver la photo actuelle</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                {% if edit %}
+                                    Sauvegarder les modifications
+                                {% else %}
+                                    Ajouter le professeur
+                                {% endif %}
+                            </button>
+                            <a href="{% url 'core:professor_list' %}" class="btn btn-outline-secondary">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

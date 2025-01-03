@@ -1,0 +1,150 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Mon Profil - {{ role }}</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Photo de profil -->
+                        <div class="col-md-4 text-center mb-4">
+                            <div class="position-relative">
+                                <div class="profile-image-container" style="width: 200px; height: 200px; margin: 0 auto;">
+                                    {% if user.photo %}
+                                        <img src="{{ user.photo.url }}" alt="Photo de profil" class="img-fluid rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">
+                                    {% else %}
+                                        <img src="{% static 'images/default_profile.png' %}" alt="Photo de profil par défaut" class="img-fluid rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Informations du profil -->
+                        <div class="col-md-8">
+                            <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                                {% csrf_token %}
+                                
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                                            {{ message }}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+
+                                <!-- Informations de base -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Informations personnelles</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="id_first_name" class="form-label">Prénom</label>
+                                            <input type="text" name="first_name" value="{{ user.first_name }}" class="form-control" id="id_first_name" required>
+                                            {% if form.first_name.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.first_name.errors }}</div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="id_last_name" class="form-label">Nom</label>
+                                            <input type="text" name="last_name" value="{{ user.last_name }}" class="form-control" id="id_last_name" required>
+                                            {% if form.last_name.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.last_name.errors }}</div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="id_email" class="form-label">Email</label>
+                                            <input type="email" name="email" value="{{ user.email }}" class="form-control" id="id_email" required>
+                                            {% if form.email.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.email.errors }}</div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="id_telephone" class="form-label">Téléphone</label>
+                                            <input type="tel" name="telephone" value="{{ user.telephone }}" class="form-control" id="id_telephone">
+                                            {% if form.telephone.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.telephone.errors }}</div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="id_photo" class="form-label">Photo de profil</label>
+                                            <input type="file" name="photo" class="form-control" id="id_photo" accept="image/*">
+                                            {% if form.photo.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.photo.errors }}</div>
+                                            {% endif %}
+                                            <small class="text-muted">Format recommandé : JPG, PNG. Taille max : 2MB</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Informations spécifiques au rôle -->
+                                {% if additional_info %}
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Informations {{ role }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        {% for key, value in additional_info.items %}
+                                        <div class="row mb-2">
+                                            <div class="col-sm-4">
+                                                <strong>{{ key }}:</strong>
+                                            </div>
+                                            <div class="col-sm-8">
+                                                {{ value }}
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Style personnalisé -->
+<style>
+    .form-control, .form-select {
+        border-radius: 0.375rem;
+    }
+    .card {
+        border-radius: 0.5rem;
+        border: none;
+    }
+    .card-header {
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+    }
+    .btn {
+        border-radius: 0.375rem;
+    }
+    .profile-image-container {
+        border-radius: 50%;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+    }
+</style>
+{% endblock %}

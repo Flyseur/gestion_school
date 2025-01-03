@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Message</h2>
+                    <div>
+                        <a href="{% url 'core:received_messages' %}" class="btn btn-secondary">Retour</a>
+                        <a href="{% url 'core:delete_message' message.id %}" 
+                           class="btn btn-danger"
+                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce message ?')">
+                            Supprimer
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="message-details">
+                        <div class="mb-3">
+                            <strong>De :</strong> {{ message.sender.get_full_name }}
+                        </div>
+                        <div class="mb-3">
+                            <strong>À :</strong> {{ message.recipient.get_full_name }}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Date :</strong> {{ message.date_sent|date:"d/m/Y H:i" }}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Sujet :</strong> {{ message.subject }}
+                        </div>
+                        <hr>
+                        <div class="message-content">
+                            {{ message.content|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

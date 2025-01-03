@@ -1,0 +1,95 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Gestion des présences{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h4 class="card-title mb-0">Gestion des présences - {{ today|date:"l d F Y" }}</h4>
+        </div>
+        <div class="card-body">
+            <!-- Sélection de la classe -->
+            <form method="get" class="mb-4">
+                <div class="row align-items-end">
+                    <div class="col-md-4">
+                        <label for="classe" class="form-label">Sélectionner une classe</label>
+                        <select name="classe" id="classe" class="form-select" onchange="this.form.submit()">
+                            <option value="">Choisir une classe</option>
+                            {% for classe in classes %}
+                            <option value="{{ classe.id }}" {% if selected_class == classe.id|stringformat:"i" %}selected{% endif %}>
+                                {{ classe.nom }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </form>
+
+            {% if selected_class %}
+            <div class="row">
+                <!-- Liste des étudiants non présents -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-white">
+                            <h5 class="card-title mb-0">Étudiants non présents</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                {% for student in students %}
+                                {% if student.id not in present_students %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ student.user.get_full_name }}
+                                    <form method="post" action="{% url 'core:mark_presence' %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="student_id" value="{{ student.id }}">
+                                        <input type="hidden" name="class_id" value="{{ selected_class }}">
+                                        <button type="submit" class="btn btn-success btn-sm">
+                                            <i class="fas fa-check me-1"></i>Marquer présent
+                                        </button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liste des étudiants présents -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-white">
+                            <h5 class="card-title mb-0">Étudiants présents</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                {% for presence in presences %}
+                                {% if presence.etudiant.id in present_students %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ presence.etudiant.user.get_full_name }}
+                                    <div>
+                                        <small class="text-muted me-3">{{ presence.heure_arrivee|time:"H:i" }}</small>
+                                        <a href="{% url 'core:remove_presence' presence.id %}" 
+                                           class="btn btn-danger btn-sm"
+                                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette présence ?')">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                Veuillez sélectionner une classe pour gérer les présences.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

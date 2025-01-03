@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Ajouter un cours</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Matière et Professeur -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.matiere|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.professeur|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <!-- Classe -->
+                        {{ form.classe|as_crispy_field }}
+                        
+                        <!-- Jour et Horaires -->
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{ form.jour|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.heure_debut|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.heure_fin|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <!-- Commentaire -->
+                        {{ form.commentaire|as_crispy_field }}
+                        
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading">Instructions :</h5>
+                            <ol class="mb-0">
+                                <li>Sélectionnez la matière</li>
+                                <li>Choisissez le professeur</li>
+                                <li>Sélectionnez la classe</li>
+                                <li>Indiquez le jour et les horaires</li>
+                                <li>Ajoutez un commentaire si nécessaire</li>
+                            </ol>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'core:cours_list' %}" class="btn btn-secondary me-md-2">Annuler</a>
+                            <button type="submit" class="btn btn-primary">Enregistrer le cours</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Initialisation des select2 pour une meilleure interface de sélection
+        $('#id_matiere, #id_professeur, #id_classe').select2({
+            theme: 'bootstrap-5',
+            width: '100%'
+        });
+    });
+</script>
+{% endblock %}

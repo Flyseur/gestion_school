@@ -1,0 +1,74 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Menu de navigation des messages -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'core:compose_message' %}" class="btn btn-primary">
+                            <i class="fas fa-pen"></i> Nouveau Message
+                        </a>
+                    </div>
+                    <hr>
+                    <div class="list-group">
+                        <a href="{% url 'core:inbox' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-inbox"></i> Boîte de réception
+                        </a>
+                        <a href="{% url 'core:sent_messages' %}" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-paper-plane"></i> Messages envoyés
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des messages envoyés -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Messages envoyés</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>À</th>
+                                    <th>Sujet</th>
+                                    <th>Date</th>
+                                    <th>État</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for message in messages %}
+                                <tr>
+                                    <td>{{ message.recipient.get_full_name|default:message.recipient.username }}</td>
+                                    <td>
+                                        <a href="{% url 'core:view_message' message.id %}" class="text-decoration-none">
+                                            {{ message.subject }}
+                                        </a>
+                                    </td>
+                                    <td>{{ message.date_sent|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        {% if message.is_read %}
+                                            <span class="badge bg-success">Lu</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">Non lu</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">Aucun message envoyé</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

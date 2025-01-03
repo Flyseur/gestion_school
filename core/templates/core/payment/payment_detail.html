@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Détails du Paiement{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">Détails du Paiement</h1>
+                <div>
+                    {% if user.is_staff %}
+                    <a href="{% url 'core:payment_receipt' pk=payment.id %}" class="btn btn-success me-2" target="_blank">
+                        <i class="fas fa-print me-1"></i>Imprimer le reçu
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'core:payment_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="card-title mb-3">Informations du paiement</h5>
+                    <table class="table">
+                        <tr>
+                            <th style="width: 150px;">Référence:</th>
+                            <td>{{ payment.reference }}</td>
+                        </tr>
+                        <tr>
+                            <th>Type:</th>
+                            <td>{{ payment.get_type_paiement_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Montant:</th>
+                            <td>{{ payment.montant }} FCFA</td>
+                        </tr>
+                        <tr>
+                            <th>Date:</th>
+                            <td>{{ payment.date_paiement }}</td>
+                        </tr>
+                        <tr>
+                            <th>Reçu par:</th>
+                            <td>{{ payment.recu_par.get_full_name }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="card-title mb-3">Informations de l'étudiant</h5>
+                    <table class="table">
+                        <tr>
+                            <th style="width: 150px;">Nom:</th>
+                            <td>{{ payment.etudiant.user.get_full_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Classe:</th>
+                            <td>{{ payment.etudiant.classe }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ payment.etudiant.user.email }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            {% if payment.commentaire %}
+            <div class="mt-4">
+                <h5 class="card-title">Commentaire</h5>
+                <p class="card-text">{{ payment.commentaire }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

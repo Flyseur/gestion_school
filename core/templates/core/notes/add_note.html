@@ -1,0 +1,83 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Ajouter une note</h2>
+                </div>
+                <div class="card-body">
+                    {% if not cours_exists %}
+                    <div class="alert alert-warning">
+                        <h5>Attention !</h5>
+                        <p>Aucun cours n'a été créé. Veuillez d'abord <a href="{% url 'core:add_cours' %}" class="alert-link">créer un cours</a> avant d'ajouter une note.</p>
+                    </div>
+                    {% else %}
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Étudiant et Cours -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.etudiant|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.cours|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <!-- Note et Type -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.valeur|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.type_evaluation|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <!-- Date -->
+                        {{ form.date|as_crispy_field }}
+                        
+                        <!-- Commentaire -->
+                        {{ form.commentaire|as_crispy_field }}
+                        
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading">Instructions :</h5>
+                            <ol class="mb-0">
+                                <li>Sélectionnez l'étudiant</li>
+                                <li>Choisissez le cours</li>
+                                <li>Entrez la note sur 20</li>
+                                <li>Sélectionnez le type d'évaluation</li>
+                                <li>Indiquez la date</li>
+                                <li>Ajoutez un commentaire si nécessaire</li>
+                            </ol>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'core:notes_list' %}" class="btn btn-secondary me-md-2">Annuler</a>
+                            <button type="submit" class="btn btn-primary">Enregistrer la note</button>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Initialisation des select2 pour une meilleure interface de sélection
+        $('#id_etudiant, #id_cours').select2({
+            theme: 'bootstrap-5',
+            width: '100%'
+        });
+    });
+</script>
+{% endblock %}

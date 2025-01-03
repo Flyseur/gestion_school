@@ -1,0 +1,241 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Liste des Classes{% endblock %}
+
+{% block content %}
+<div class="container-fluid fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Liste des Classes</h1>
+        <div class="d-flex gap-2">
+            <a href="{% url 'core:add_class' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Ajouter une classe
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtres et recherche -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="search" name="search" value="{{ request.GET.search }}" placeholder="Rechercher...">
+                        <label for="search">Rechercher une classe</label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-floating">
+                        <select class="form-select" id="niveau" name="niveau">
+                            <option value="">Tous les niveaux</option>
+                            {% for niv in niveaux %}
+                            <option value="{{ niv }}" {% if request.GET.niveau == niv %}selected{% endif %}>
+                                {{ niv }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <label for="niveau">Niveau</label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-floating">
+                        <select class="form-select" id="annee" name="annee">
+                            <option value="">Toutes les années</option>
+                            {% for an in annees %}
+                            <option value="{{ an }}" {% if request.GET.annee == an %}selected{% endif %}>
+                                {{ an }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <label for="annee">Année scolaire</label>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-center">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Liste des classes -->
+    <div class="row g-4">
+        {% for classe in classes %}
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">{{ classe.nom }}</h5>
+                        <span class="badge bg-primary">{{ classe.niveau }}</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="icon-circle bg-info text-white me-3">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Effectif</h6>
+                                <p class="mb-0">{{ classe.students.count }} étudiants</p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="icon-circle bg-success text-white me-3">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Professeur Principal</h6>
+                                <p class="mb-0">
+                                    {% if classe.professeur_principal %}
+                                    {{ classe.professeur_principal.user.get_full_name }}
+                                    {% else %}
+                                    <span class="text-muted">Non assigné</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center">
+                            <div class="icon-circle bg-warning text-white me-3">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Cours</h6>
+                                <p class="mb-0">{{ classe.cours_set.count }} cours</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="btn-group">
+                            <a href="{% url 'core:class_detail' classe.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i>Détails
+                            </a>
+                            <a href="{% url 'core:edit_class' classe.id %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-edit me-1"></i>Modifier
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete('{% url 'core:delete_class' classe.id %}')">
+                                <i class="fas fa-trash me-1"></i>Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-school fa-3x text-muted mb-3"></i>
+                    <h5>Aucune classe trouvée</h5>
+                    <p class="text-muted">Commencez par ajouter une nouvelle classe</p>
+                    <a href="{% url 'core:add_class' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Ajouter une classe
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if classes.has_other_pages %}
+    <nav class="mt-4" aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if classes.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ classes.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.niveau %}&niveau={{ request.GET.niveau }}{% endif %}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in classes.paginator.page_range %}
+            {% if classes.number == num %}
+            <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+            </li>
+            {% elif num > classes.number|add:'-3' and num < classes.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.niveau %}&niveau={{ request.GET.niveau }}{% endif %}">
+                    {{ num }}
+                </a>
+            </li>
+            {% endif %}
+            {% endfor %}
+
+            {% if classes.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ classes.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.niveau %}&niveau={{ request.GET.niveau }}{% endif %}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<style>
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .form-floating > .form-control,
+    .form-floating > .form-select {
+        height: calc(3.5rem + 2px);
+        line-height: 1.25;
+    }
+
+    .form-floating > label {
+        padding: 1rem 0.75rem;
+    }
+
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .pagination .page-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        border: none;
+        margin: 0 0.25rem;
+        border-radius: 0.25rem;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .badge {
+        padding: 0.5em 0.75em;
+        font-weight: 500;
+    }
+</style>
+
+<script>
+    function confirmDelete(url) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette classe ?')) {
+            window.location.href = url;
+        }
+    }
+</script>
+{% endblock %}

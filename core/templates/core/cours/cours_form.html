@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if action == 'Modifier' %}Modifier{% else %}Ajouter{% endif %} un cours{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">{% if action == 'Modifier' %}Modifier{% else %}Ajouter{% endif %} un cours</h2>
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            {{ form.matiere|as_crispy_field }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.professeur|as_crispy_field }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.classe|as_crispy_field }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.jour|as_crispy_field }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.heure_debut|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.heure_fin|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.commentaire|as_crispy_field }}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                {% if action == 'Modifier' %}Modifier{% else %}Ajouter{% endif %} le cours
+                            </button>
+                            <a href="{% url 'core:cours_list' %}" class="btn btn-secondary">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,369 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ student.user.get_full_name }} - Détails de l'étudiant{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Graphique des notes
+        const ctxNotes = document.getElementById('notesChart').getContext('2d');
+        new Chart(ctxNotes, {
+            type: 'line',
+            data: {
+                labels: {{ notes_labels|safe }},
+                datasets: [{
+                    label: 'Évolution des notes',
+                    data: {{ notes_data|safe }},
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 20
+                    }
+                }
+            }
+        });
+
+        // Graphique des absences
+        const ctxAbsences = document.getElementById('absencesChart').getContext('2d');
+        new Chart(ctxAbsences, {
+            type: 'bar',
+            data: {
+                labels: {{ absences_labels|safe }},
+                datasets: [{
+                    label: 'Absences par mois',
+                    data: {{ absences_data|safe }},
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgb(255, 99, 132)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Carte d'information de l'étudiant -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <div class="position-relative mb-4">
+                        {% if student.photo %}
+                            <img src="{{ student.photo.url }}" alt="Photo de {{ student.user.get_full_name }}" 
+                                 class="rounded-circle shadow" style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mx-auto shadow" 
+                                 style="width: 150px; height: 150px;">
+                                <i class="fas fa-user-graduate text-white" style="font-size: 4rem;"></i>
+                            </div>
+                        {% endif %}
+                        {% if user.groups.all.0.name == 'Administrators' %}
+                            <a href="#" class="position-absolute bottom-0 end-0 btn btn-sm btn-primary rounded-circle"
+                               style="margin-right: 85px;" title="Modifier la photo">
+                                <i class="fas fa-camera"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                    <h3 class="mb-0">{{ student.user.get_full_name }}</h3>
+                    <p class="text-muted">{{ student.matricule }}</p>
+                    
+                    <div class="border-top pt-3 mt-3">
+                        <div class="row text-center">
+                            <div class="col">
+                                <h4 class="h6 mb-0">Classe</h4>
+                                <small class="text-muted">{{ student.classe.nom|default:"Non attribué" }}</small>
+                            </div>
+                            <div class="col">
+                                <h4 class="h6 mb-0">Moyenne</h4>
+                                <small class="text-muted">{{ moyenne_generale|floatformat:2 }}/20</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body border-top">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4"><i class="fas fa-envelope text-muted me-2"></i>Email</dt>
+                        <dd class="col-sm-8">{{ student.user.email }}</dd>
+                        
+                        <dt class="col-sm-4"><i class="fas fa-phone text-muted me-2"></i>Téléphone</dt>
+                        <dd class="col-sm-8">{{ student.telephone }}</dd>
+                        
+                        <dt class="col-sm-4"><i class="fas fa-map-marker-alt text-muted me-2"></i>Adresse</dt>
+                        <dd class="col-sm-8">{{ student.adresse }}</dd>
+                        
+                        <dt class="col-sm-4"><i class="fas fa-calendar text-muted me-2"></i>Naissance</dt>
+                        <dd class="col-sm-8">{{ student.date_naissance|date:"d/m/Y" }}</dd>
+                    </dl>
+                </div>
+                
+                {% if user.groups.all.0.name == 'Administrators' %}
+                <div class="card-footer bg-transparent">
+                    <a href="#" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="fas fa-edit me-1"></i>Modifier les informations
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Contenu principal -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="notes-tab" data-bs-toggle="tab" href="#notes" role="tab">
+                                <i class="fas fa-chart-line me-1"></i>Notes et Progression
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="payments-tab" data-bs-toggle="tab" href="#payments" role="tab">
+                                <i class="fas fa-money-bill-wave me-1"></i>Paiements
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="absences-tab" data-bs-toggle="tab" href="#absences" role="tab">
+                                <i class="fas fa-calendar-times me-1"></i>Absences
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="documents-tab" data-bs-toggle="tab" href="#documents" role="tab">
+                                <i class="fas fa-file-alt me-1"></i>Documents
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="card-body">
+                    <div class="tab-content">
+                        <!-- Onglet Notes -->
+                        <div class="tab-pane fade show active" id="notes" role="tabpanel">
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <canvas id="notesChart" height="100"></canvas>
+                                </div>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Matière</th>
+                                            <th>Type</th>
+                                            <th>Note</th>
+                                            <th>Coefficient</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for note in notes %}
+                                        <tr>
+                                            <td>{{ note.cours.matiere.nom }}</td>
+                                            <td>{{ note.get_type_evaluation_display }}</td>
+                                            <td>
+                                                <span class="badge {% if note.valeur >= 10 %}bg-success{% else %}bg-danger{% endif %}">
+                                                    {{ note.valeur }}/20
+                                                </span>
+                                            </td>
+                                            <td>{{ note.cours.matiere.coefficient }}</td>
+                                            <td>{{ note.date|date:"d/m/Y" }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4">
+                                                <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                                                <p class="mb-0">Aucune note enregistrée</p>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Onglet Paiements -->
+                        <div class="tab-pane fade" id="payments" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <h5 class="mb-0">Total payé : {{ total_paye|floatformat:0 }} FCFA</h5>
+                                    <small class="text-muted">Reste à payer : {{ reste_a_payer|floatformat:0 }} FCFA</small>
+                                </div>
+                                {% if user.groups.all.0.name == 'Administrators' %}
+                                <a href="{% url 'core:add_payment' %}?student={{ student.id }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus-circle me-1"></i>Nouveau paiement
+                                </a>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Montant</th>
+                                            <th>Référence</th>
+                                            <th>Statut</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for payment in payments %}
+                                        <tr>
+                                            <td>{{ payment.date_paiement|date:"d/m/Y" }}</td>
+                                            <td>{{ payment.get_type_paiement_display }}</td>
+                                            <td>{{ payment.montant|floatformat:0 }} FCFA</td>
+                                            <td>{{ payment.reference }}</td>
+                                            <td>
+                                                <span class="badge {% if payment.statut == 'VALIDE' %}bg-success{% elif payment.statut == 'EN_ATTENTE' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                                    {{ payment.get_statut_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'core:payment_detail' payment.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="6" class="text-center py-4">
+                                                <i class="fas fa-money-bill-wave fa-3x text-muted mb-3"></i>
+                                                <p class="mb-0">Aucun paiement enregistré</p>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Onglet Absences -->
+                        <div class="tab-pane fade" id="absences" role="tabpanel">
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <canvas id="absencesChart" height="100"></canvas>
+                                </div>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Justifié</th>
+                                            <th>Motif</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for absence in absences %}
+                                        <tr>
+                                            <td>{{ absence.date_absence|date:"d/m/Y" }}</td>
+                                            <td>
+                                                {% if absence.justifie %}
+                                                    <span class="badge bg-success">Oui</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Non</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ absence.motif|default:"Non spécifié" }}</td>
+                                            <td>
+                                                {% if user.groups.all.0.name == 'Administrators' %}
+                                                <div class="btn-group">
+                                                    <button class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center py-4">
+                                                <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+                                                <p class="mb-0">Aucune absence enregistrée</p>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Onglet Documents -->
+                        <div class="tab-pane fade" id="documents" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-12 mb-4">
+                                    {% if user.groups.all.0.name == 'Administrators' %}
+                                    <button class="btn btn-primary btn-sm">
+                                        <i class="fas fa-upload me-1"></i>Ajouter un document
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <i class="fas fa-file-pdf text-danger me-2"></i>Bulletin Semestriel
+                                            </h5>
+                                            <p class="card-text text-muted">Dernier bulletin de notes</p>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-download me-1"></i>Télécharger
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <i class="fas fa-file-contract text-info me-2"></i>Certificat de Scolarité
+                                            </h5>
+                                            <p class="card-text text-muted">Année scolaire en cours</p>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-download me-1"></i>Télécharger
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
